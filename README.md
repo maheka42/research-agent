@@ -80,7 +80,7 @@ uvicorn research_assistant.api:app --reload --port 8000
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open https://research-agent-psi-sepia.vercel.app/
 
 ## CLI
 
