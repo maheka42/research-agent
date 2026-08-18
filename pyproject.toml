@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multi-agent-research-assistant"
+version = "0.1.0"
+description = "Multi-agent research assistant powered by LangGraph and LangChain"
+requires-python = ">=3.10"
+dependencies = [
+    "langchain>=0.3.0",
+    "langgraph>=0.2.0",
+    "langchain-openai>=0.2.0",
+    "langchain-text-splitters>=0.3.0",
+    "ddgs>=9.0.0",
+    "pypdf>=4.0.0",
+    "python-dotenv>=1.0.0",
+    "rich>=13.0.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.27.0",
+    "python-multipart>=0.0.9",
+]
+
+[project.scripts]
+research-assistant = "research_assistant.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["research_assistant*"]
