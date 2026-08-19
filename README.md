@@ -1,143 +1,259 @@
+
 # Multi-Agent Research Assistant
 
-Ask a research question and get back a sourced report. Then keep talking to it. Four AI agents split the work: one plans, one searches the web, one reads documents you upload, and one writes the report. Once a report exists you can ask follow-up questions or request edits.
+A full-stack AI research assistant that turns research questions into structured, sourced reports using a coordinated multi-agent workflow.
 
-Built with LangGraph, FastAPI, and Next.js.
+## Live Demo
+
+🚀 **[Try the Research Assistant](https://research-agent-psi-sepia.vercel.app/)**
+
+The application is fully deployed and working in production.
 
 ## Features
 
-- **A real research pipeline.** A new question starts four agents that plan, search, analyse documents, and write a structured report. Progress is streamed to the browser step by step.
-- **Intent routing.** Every message is classified first. Replying "ok" or "which sources did you use?" gets a conversational answer instead of re-running the whole pipeline. Ask for "make it shorter" and it revises the existing report in place.
-- **Document analysis.** Upload PDFs, text, Markdown, or CSV and the document analyst folds them into the research.
-- **Saved chats.** History lives in a sidebar with pin, rename, archive, and delete, stored in the browser so a reload never loses your work.
-- **PDF export.** Any report can be downloaded.
+- 🤖 Multi-agent AI research workflow
+- 🧠 Intelligent research planning and orchestration
+- 🌐 Web research and source gathering
+- 📄 PDF, TXT, Markdown, and CSV document analysis
+- 💬 Intelligent follow-up conversations
+- ✏️ Existing report revision
+- ⚡ Real-time agent progress streaming
+- 📚 Persistent chat history
+- 📌 Pin, rename, archive, and delete conversations
+- 📑 Structured research reports
+- 📥 PDF report export
+- 🌙 Dark-themed responsive interface
 
-## How the pipeline works
+## How It Works
 
-The four agents share one state object and pass control through a graph. The orchestrator is the hub. Every specialist returns to it, and it decides what happens next.
+The application uses four specialized AI agents coordinated through LangGraph.
 
-```
-query
-  |
-  v
-orchestrator  <-------------------+
-  |                               |
-  +--> web researcher ------------+
-  |                               |
-  +--> document analyst ----------+
-  |
-  +--> synthesizer --> report
-```
+```text
+                        ┌──────────────────┐
+                        │   Orchestrator   │
+                        │  Plan & Route    │
+                        └────────┬─────────┘
+                                 │
+                 ┌───────────────┼───────────────┐
+                 │               │               │
+                 ▼               ▼               │
+        ┌────────────────┐ ┌────────────────┐   │
+        │ Web Researcher │ │Document Analyst│   │
+        │                │ │                │   │
+        │ Search & Gather│ │ Analyze Uploads│   │
+        └────────┬───────┘ └───────┬────────┘   │
+                 │                 │            │
+                 └────────┬────────┘            │
+                          ▼                     │
+                  ┌───────────────┐             │
+                  │  Orchestrator │◄────────────┘
+                  │ Review & Route│
+                  └───────┬───────┘
+                          │
+                          ▼
+                  ┌───────────────┐
+                  │  Synthesizer  │
+                  │ Final Report  │
+                  └───────────────┘
+````
 
-1. The orchestrator reads the query, writes a plan, and picks which specialist goes first.
-2. That specialist works and adds what it found to the shared state.
-3. Control returns to the orchestrator. It reviews the findings, then routes to another specialist or decides there is enough to write up.
-4. The synthesizer turns the findings into a report with an executive summary, key findings, conflicts between sources, knowledge gaps, and recommendations.
+### Research Flow
 
-The orchestrator runs at most three times per query, so the agents cannot loop forever. If no documents are uploaded, it never routes to the document analyst.
+1. The **Orchestrator** analyzes the user's question and creates a research plan.
+2. The **Web Researcher** searches the web and gathers relevant information.
+3. The **Document Analyst** analyzes uploaded documents when provided.
+4. Findings are returned to the **Orchestrator** for evaluation.
+5. The **Synthesizer** combines the findings into a structured research report.
+6. The report can be discussed, revised, or exported as a PDF.
 
-## The conversational layer
+## Intelligent Conversation
 
-Not every message is a research request, so the backend classifies each turn before doing any work. The classifier sees the chat history and whether a report already exists.
+The application does not restart the entire research pipeline for every message.
 
-| Action | When | What happens |
-|--------|------|--------------|
-| `research` | A new topic, or an explicit request for a report | Runs the full four-agent pipeline |
-| `answer` | A follow-up, a clarification, or an acknowledgement like "ok" | One conversational reply. No pipeline, no new report |
-| `revise` | A request to change the existing report | Rewrites the report with the edit applied |
+Each message is classified into one of three actions:
 
-This is what stops the classic failure where every reply, even "ok", starts a brand-new report.
+| Action     | Purpose                                             |
+| ---------- | --------------------------------------------------- |
+| `research` | Starts a new research workflow                      |
+| `answer`   | Handles follow-up questions and normal conversation |
+| `revise`   | Modifies an existing research report                |
 
-## Setup
+For example:
 
-You need Python 3.10 or newer, Node.js 20.9 or newer, and an [OpenAI API key](https://platform.openai.com/api-keys).
+```text
+Research the history of Java
+        ↓
+Research pipeline
+        ↓
+Structured report
 
-```bash
-git clone https://github.com/Akshats-git/Research-Agent.git
-cd Research-Agent
+"Which sources did you use?"
+        ↓
+Follow-up answer
 
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
-
-cp .env.example .env   # then add your OpenAI API key
-
-cd frontend && npm install
-```
-
-## Running
-
-Start the backend and the frontend in separate terminals.
-
-```bash
-# terminal 1, from the project root
-source .venv/bin/activate
-uvicorn research_assistant.api:app --reload --port 8000
-```
-
-```bash
-# terminal 2, from frontend/
-npm run dev
-```
-
-Open https://research-agent-psi-sepia.vercel.app/
-
-## CLI
-
-The research pipeline also runs on its own, without the frontend or the conversational layer.
-
-```bash
-research-assistant "What are the latest advances in quantum computing?"
-research-assistant "Summarize the key themes" --files paper.pdf notes.txt
-research-assistant    # interactive prompt
-```
-
-## Configuration
-
-`OPENAI_API_KEY` is required. Everything else has a working default.
-
-| Variable | Where | Default | Purpose |
-|----------|-------|---------|---------|
-| `OPENAI_API_KEY` | `.env` | none | Required for every LLM call |
-| `ALLOWED_ORIGINS` | `.env` | `http://localhost:3000` | Comma-separated origins the API accepts |
-| `NEXT_PUBLIC_API_URL` | `frontend/.env.local` | `http://localhost:8000` | Backend the browser calls |
-
-The model and the orchestrator's iteration cap live in `research_assistant/config.py`:
-
-```python
-MODEL_NAME = "gpt-4o"
-MAX_ITERATIONS = 3
+"Make the report shorter"
+        ↓
+Report revision
 ```
 
-## Project layout
+## Document Analysis
 
+Users can upload documents and incorporate their contents into research.
+
+Supported formats:
+
+* PDF
+* TXT
+* Markdown
+* CSV
+
+The document analyst extracts relevant information and adds it to the shared research state.
+
+## Real-Time Streaming
+
+Research progress is streamed from the backend to the frontend using **Server-Sent Events (SSE)**.
+
+The interface displays agent activity while the research is being performed instead of waiting for the entire workflow to finish.
+
+## Report Generation
+
+The synthesizer produces structured reports containing sections such as:
+
+* Executive Summary
+* Key Findings
+* Source Attribution
+* Conflicting Information
+* Knowledge Gaps
+* Recommendations
+
+Reports can also be exported using the browser's **Save as PDF** functionality.
+
+## Tech Stack
+
+### Frontend
+
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+
+### Backend
+
+* Python
+* FastAPI
+* Uvicorn
+
+### AI & Agent Framework
+
+* LangGraph
+* LangChain
+* Groq
+
+### Tools
+
+* DDGS — Web Search
+* pypdf — PDF Text Extraction
+* Server-Sent Events — Real-Time Streaming
+
+## Architecture
+
+```text
+User
+ │
+ ▼
+Next.js Frontend
+ │
+ │ Server-Sent Events
+ ▼
+FastAPI Backend
+ │
+ ▼
+LangGraph Workflow
+ │
+ ├── Orchestrator
+ │
+ ├── Web Researcher
+ │
+ ├── Document Analyst
+ │
+ └── Synthesizer
+ │
+ ▼
+Structured Research Report
 ```
-research_assistant/
-├── api.py              FastAPI backend; streams every turn over SSE
-├── cli.py              Command-line entry point
-├── config.py           Model settings and the LLM factory
-├── console.py          Terminal rendering for the CLI
-├── conversation.py     Intent router plus the answer and revise handlers
-├── graph.py            Wires the agents into the LangGraph workflow
-├── state.py            Shared graph state
-├── agents/             One module per agent
-└── tools/              Web search and document loading
 
-frontend/src/
-├── app/                Next.js routes and global styles
-├── components/         Chat view, sidebar, pipeline, report card
-└── lib/                Chat store, SSE client, pipeline state logic
+## Deployment
+
+The application is deployed as a production full-stack application.
+
+| Component | Platform |
+| --------- | -------- |
+| Frontend  | Vercel   |
+| Backend   | Render   |
+| LLM       | Groq     |
+
+### Production URLs
+
+**Frontend**
+
+[https://research-agent-psi-sepia.vercel.app/](https://research-agent-psi-sepia.vercel.app/)
+
+**Backend**
+
+[https://research-agent-44bx.onrender.com/](https://research-agent-44bx.onrender.com/)
+
+The production frontend and backend are connected and working end-to-end.
+
+## Project Structure
+
+
+Research-Agent/
+│
+├── research_assistant/
+│   ├── agents/
+│   │   ├── orchestrator.py
+│   │   ├── web_researcher.py
+│   │   ├── document_analyst.py
+│   │   └── synthesizer.py
+│   │
+│   ├── tools/
+│   │   ├── documents.py
+│   │   └── search.py
+│   │
+│   ├── api.py
+│   ├── cli.py
+│   ├── config.py
+│   ├── conversation.py
+│   ├── graph.py
+│   └── state.py
+│
+├── frontend/
+│   └── src/
+│       ├── app/
+│       ├── components/
+│       └── lib/
+│
+├── pyproject.toml
+├── .env.example
+├── .gitignore
+└── README.md
 ```
 
-## How the backend talks to the browser
+## Production Status
 
-The backend exposes one endpoint, `POST /api/chat`, and streams progress back as [Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events). Each turn emits an `intent` event with the router's decision. Then it emits either a run of `agent_update` events for research, a `message` event for an answer, or a `report` event for a revision. It finishes with `complete`. The frontend reads the stream and updates the active chat in place.
+- Multi-agent research pipeline working
+- Web research working
+- Document analysis working
+- Conversational follow-ups working
+- Report revision working
+- Real-time progress streaming working
+- Production API working
+- Frontend deployed on Vercel
+- Backend deployed on Render
+- PDF export working
 
-## Built with
+## Project
 
-- [LangGraph](https://github.com/langchain-ai/langgraph) for the agent graph and shared state
-- [LangChain](https://github.com/langchain-ai/langchain) and OpenAI GPT-4o for the LLM calls and tool binding
-- [FastAPI](https://fastapi.tiangolo.com/) for the streaming API
-- [Next.js](https://nextjs.org/) and [Tailwind CSS](https://tailwindcss.com/) for the frontend
-- [ddgs](https://pypi.org/project/ddgs/) for web search, which needs no API key
-- [pypdf](https://github.com/py-pdf/pypdf) for PDF text extraction
+A full-stack multi-agent AI research application built to demonstrate practical agent orchestration, tool use, document analysis, streaming APIs, conversational routing, and production deployment.
+
+That's it.
