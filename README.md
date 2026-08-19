@@ -5,24 +5,24 @@ A full-stack AI research assistant that turns research questions into structured
 
 ## Live Demo
 
-🚀 **[Try the Research Assistant](https://research-agent-psi-sepia.vercel.app/)**
+ **[Try the Research Assistant](https://research-agent-psi-sepia.vercel.app/)**
 
 The application is fully deployed and working in production.
 
 ## Features
 
-- 🤖 Multi-agent AI research workflow
-- 🧠 Intelligent research planning and orchestration
-- 🌐 Web research and source gathering
-- 📄 PDF, TXT, Markdown, and CSV document analysis
-- 💬 Intelligent follow-up conversations
-- ✏️ Existing report revision
-- ⚡ Real-time agent progress streaming
-- 📚 Persistent chat history
-- 📌 Pin, rename, archive, and delete conversations
-- 📑 Structured research reports
-- 📥 PDF report export
-- 🌙 Dark-themed responsive interface
+-  Multi-agent AI research workflow
+-  Intelligent research planning and orchestration
+-  Web research and source gathering
+-  PDF, TXT, Markdown, and CSV document analysis
+-  Intelligent follow-up conversations
+-  Existing report revision
+-  Real-time agent progress streaming
+-  Persistent chat history
+-  Pin, rename, archive, and delete conversations
+-  Structured research reports
+-  PDF report export
+-  Dark-themed responsive interface
 
 ## How It Works
 
